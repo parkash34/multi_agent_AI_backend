@@ -27,3 +27,22 @@ if not pinecone_api_key:
 app = FastAPI()
 sessions = {}
 db_manager = DatabaseManager("restaurant.db")
+
+class ChatMessage(BaseModel):
+    session_id: str
+    message: str
+
+    @field_validator("session_id")
+    @classmethod
+    def session_id_is_missing(cls, v):
+        if not v.strip():
+            raise ValueError("Session ID is missing")
+        return v
+    
+    @field_validator("message")
+    @classmethod
+    def message_is_empty(cls, v):
+        if not v.strip():
+            raise ValueError("Message is empty")
+        return v
+    
