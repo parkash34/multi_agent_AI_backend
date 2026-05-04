@@ -23,3 +23,7 @@ if not api_key:
 pinecone_api_key = os.getenv("PINECONE_API_KEY")
 if not pinecone_api_key:
     raise ValueError("PINECONE API KEY is missing in env")
+
+app = FastAPI()
+sessions = {}
+db_manager = DatabaseManager("restaurant.db")
