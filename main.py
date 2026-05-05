@@ -266,3 +266,9 @@ agents = {
     "reservation": reservation_agent,
     "faq": faq_agent
 }
+
+def get_session(session_id: str) -> list:
+    if session_id not in sessions:
+        sessions[session_id] = []
+
+    return sessions[session_id]
