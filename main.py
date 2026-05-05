@@ -10,6 +10,7 @@ from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_groq import ChatGroq
 from langchain_core.tools import tool
+from langchain_core.messages import HumanMessage,AIMessage
 from langgraph.prebuilt import create_react_agent
 from database import DatabaseManager
 
@@ -272,3 +273,48 @@ def get_session(session_id: str) -> list:
         sessions[session_id] = []
 
     return sessions[session_id]
+
+def route_message(message: str, history: list) -> str:
+    """Routes message to correct agent using history context."""
+    
+    history_text = ""
+    if history:
+        recent = history[-4:]
+        for msg in recent:
+            role = msg["role"].upper()
+            history_text += f"{role}: {msg['content']}\n"
+
+    response = llm.invoke([
+        HumanMessage(content=f"""
+        You are a router for a restaurant AI system.
+        Classify which agent should handle this message.
+
+        Agents available:
+        - menu: questions about food, drinks, dietary options, prices
+        - reservation: booking tables, cancellations, updates, existing bookings
+        - faq: opening hours, location, parking, payment, policies, general info
+
+        Conversation history:
+        {history_text}
+
+        Current message: {message}
+
+        Examples:
+        "Do you have vegan pizza?" → menu
+        "Book a table for 4" → reservation
+        "Cancel my booking" → reservation
+        "What time do you open?" → faq
+        "Do you have parking?" → faq
+        "Book one for me" → reservation (follow up to booking intent)
+        "How much does it cost?" → menu (follow up to menu question)
+
+        Reply with only one word: menu, reservation, or faq
+        """)
+    ])
+
+    route = response.content.strip().lower()
+
+    if route not in ["menu", "reservation", "faq"]:
+        return "faq"
+
+    return route
