@@ -46,3 +46,21 @@ class ChatMessage(BaseModel):
             raise ValueError("Message is empty")
         return v
     
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
+
+
+pc = Pinecone(api_key=pinecone_api_key)
+
+if "bella-italia-v2" not in pc.list_indexes().names():
+    pc.create_index(
+        name="bella-italia-v2",
+        dimension=384,
+        metric="cosine",
+        spec=ServerlessSpec(
+            cloud="aws",
+            region="us-east-1"
+        )
+    )
+    
