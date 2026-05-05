@@ -51,7 +51,6 @@ embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2"
 )
 
-
 pc = Pinecone(api_key=pinecone_api_key)
 
 if "bella-italia-v2" not in pc.list_indexes().names():
@@ -203,9 +202,28 @@ def update_my_reservation(reference: str, new_date: str = None, new_time: str= N
     new_people = int(new_people) if new_people else None
     return db_manager.update_reservation(reference, new_date, new_time, new_people)
 
+
+menu_prompt = """You are Marco, menu specialist for Bella Italia.
+    Only handle food, drinks, dietary and price questions.
+    Always use search_menu_rag() for menu questions.
+    Always use check_dietary_options() for dietary questions.
+    Never handle bookings or general questions.
+    Never make up menu items."""
+
+
+menu_tools = [search_menu_rag, check_dietary_options]
+
+menu_agent = create_react_agent(llm, menu_tools, prompt=menu_prompt)
+
 @tool
 def ask_menu_agent(question: str) -> str:
-    return None
+    """Asks the menu agent a question about food or dietary options.
+    Use this when customer mentions dietary requirements during booking.
+    Example: when customer says they are vegan before booking a table."""
+    result = menu_agent.invoke({
+        "messages": [HumanMessage(content=question)]
+    })
+    return result["messages"][-1].content
 
 config = db_manager.get_config()
 
@@ -215,8 +233,6 @@ def get_restaurant_info():
     Use this for restaurant information"""
     return f"Name: Bella Italia\nOpening Hours: {config['opening_time']} to {config['closing_time']}\nLocation: Astoria, New York\nPhone: 123-456-7890"
 
-
-menu_tools = [search_menu_rag, check_dietary_options]
 
 reservation_tools = [
     check_table_availability,
@@ -230,12 +246,6 @@ reservation_tools = [
 
 faq_tools = [search_faq_rag, get_restaurant_info]
 
-menu_prompt = """You are Marco, menu specialist for Bella Italia.
-    Only handle food, drinks, dietary and price questions.
-    Always use search_menu_rag() for menu questions.
-    Always use check_dietary_options() for dietary questions.
-    Never handle bookings or general questions.
-    Never make up menu items."""
 
 reservation_prompt = """You are Sofia, reservation specialist for Bella Italia.
     Only handle bookings, cancellations, updates and lookups.
@@ -252,7 +262,6 @@ faq_prompt = """You are Luca, customer service specialist for Bella Italia.
     Never handle menu or booking questions."""
 
 
-menu_agent = create_react_agent(llm, menu_tools, prompt=menu_prompt)
 reservation_agent = create_react_agent(llm, reservation_tools, prompt=reservation_prompt)
 faq_agent = create_react_agent(llm, faq_tools, prompt=faq_prompt)
 
@@ -275,8 +284,12 @@ def route_message(message: str, history: list) -> str:
     if history:
         recent = history[-4:]
         for msg in recent:
-            role = msg["role"].upper()
-            history_text += f"{role}: {msg['content']}\n"
+            if hasattr(msg, "content"):
+                if msg.__class__.__name__ == "HumanMessage":
+                    role = "USER"
+                else:
+                    role = "ASSISTANT"
+                history_text += f"{role}: {msg.content}\n"
 
     response = llm.invoke([
         HumanMessage(content=f"""
