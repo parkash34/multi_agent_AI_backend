@@ -221,3 +221,7 @@ PINECONE_API_KEY=your_pinecone_api_key
 - Pinecone free tier — 1 index, 2GB, no credit card
 - Session memory resets when server restarts
 - routed_to field shows which agent handled each message
+
+## 👤 Author
+
+**Ohm Parkash** — [LinkedIn](https://www.linkedin.com/in/om-parkash34/) · [GitHub](https://github.com/parkash34)
