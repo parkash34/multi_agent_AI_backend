@@ -208,6 +208,10 @@ def update_my_reservation(reference: str, new_date: str = None, new_time: str= N
     new_people = int(new_people) if new_people else None
     return db_manager.update_reservation(reference, new_date, new_time, new_people)
 
+@tool
+def ask_menu_agent(question: str) -> str:
+    return None
+
 config = db_manager.get_config()
 
 @tool
@@ -215,3 +219,50 @@ def get_restaurant_info():
     """Returns restaurants Information
     Use this for restaurant information"""
     return f"Name: Bella Italia\nOpening Hours: {config['opening_time']} to {config['closing_time']}\nLocation: Astoria, New York\nPhone: 123-456-7890"
+
+
+menu_tools = [search_menu_rag, check_dietary_options]
+
+reservation_tools = [
+    check_table_availability,
+    book_table,
+    get_my_reservation,
+    find_reservations_by_name,
+    cancel_my_reservation,
+    update_my_reservation,
+    ask_menu_agent
+]
+
+faq_tools = [search_faq_rag, get_restaurant_info]
+
+menu_prompt = """You are Marco, menu specialist for Bella Italia.
+    Only handle food, drinks, dietary and price questions.
+    Always use search_menu_rag() for menu questions.
+    Always use check_dietary_options() for dietary questions.
+    Never handle bookings or general questions.
+    Never make up menu items."""
+
+reservation_prompt = """You are Sofia, reservation specialist for Bella Italia.
+    Only handle bookings, cancellations, updates and lookups.
+    Always check availability before booking.
+    Always gather name, date, time and people before booking.
+    If customer mentions dietary requirement use ask_menu_agent() first.
+    Date format YYYY-MM-DD.
+    Time any format — system handles conversion."""
+
+faq_prompt = """You are Luca, customer service specialist for Bella Italia.
+    Handle general questions about the restaurant.
+    Always use search_faq_rag() for policy questions.
+    Always use get_restaurant_info() for basic info.
+    Never handle menu or booking questions."""
+
+
+menu_agent = create_react_agent(llm, menu_tools, prompt=menu_prompt)
+reservation_agent = create_react_agent(llm, reservation_tools, prompt=reservation_prompt)
+faq_agent = create_react_agent(llm, faq_tools, prompt=faq_prompt)
+
+agents = {
+    "menu": menu_agent,
+    "reservation": reservation_agent,
+    "faq": faq_agent
+}
