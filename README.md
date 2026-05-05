@@ -37,6 +37,7 @@ and FAQ queries — with a context aware router and agent communication.
 | python-dotenv | Environment variable management |
 
 ## Project Structure
+```
 multi-agent-ai-backend/
 │
 ├── env/
@@ -46,30 +47,36 @@ multi-agent-ai-backend/
 ├── faq.txt
 ├── .env
 └── requirements.txt
-
+```
 ## Setup
 
 1. Clone the repository
+```
 git clone https://github.com/yourusername/bella-italia-multi-agent-ai-backend
-
+```
 2. Create and activate virtual environment
+```
 python -m venv env
 env\Scripts\activate
-
+```
 3. Install dependencies
+```
 pip install -r requirements.txt
-
+```
 4. Create `.env` file
+```
 API_KEY=your_groq_api_key
 PINECONE_API_KEY=your_pinecone_api_key
-
+```
 5. Add documents to project folder
+```
 menu.pdf  →  restaurant menu PDF
 faq.txt   →  frequently asked questions
-
+```
 6. Run the server
+```
 uvicorn main:app --reload
-
+```
 ## API Endpoints
 
 ### POST /chat
@@ -94,10 +101,11 @@ Main AI chatbot endpoint with multi-agent routing.
 ```
 
 ### GET /reservations
+```
 Returns all confirmed reservations.
 GET /reservations
 GET /reservations?date=2026-12-25
-
+```
 ## Agent System
 
 ### Menu Agent — Marco
@@ -130,6 +138,7 @@ Handles general restaurant questions.
 | `get_restaurant_info` | Returns restaurant details |
 
 ## Routing System
+```
 Customer message
 ↓
 Context aware router — uses last 4 messages of history
@@ -139,8 +148,9 @@ reservation →  Sofia handles bookings and cancellations
 faq         →  Luca handles general questions
 ↓
 Response returned with routed_to field
-
+```
 ## Agent Communication
+```
 Customer: "I am vegan — book a table for 4"
 ↓
 Router → reservation agent
@@ -152,7 +162,7 @@ Sofia calls ask_menu_agent() → consults Marco
 Marco confirms vegan options available
 ↓
 Sofia books table with vegan special requirement
-
+```
 ## Database Schema
 
 ```sql
@@ -180,12 +190,14 @@ CREATE TABLE restaurant_config (
 ```
 
 ## Validation Rules
+```
 Time: must be within opening hours
 Date: must be in the future
 Capacity: maximum 50 people per slot
 Time formats: 7 PM, 19:00, 7:00 PM, 7pm all accepted
-
+```
 ## Document Pipeline
+```
 menu.pdf + faq.txt
 ↓
 Loaded and split into chunks
@@ -195,11 +207,13 @@ Embedded with HuggingFace all-MiniLM-L6-v2
 Stored permanently in Pinecone
 ↓
 Agents search by meaning not keywords
+```
 
 ## Environment Variables
+```
 API_KEY=your_groq_api_key
 PINECONE_API_KEY=your_pinecone_api_key
-
+```
 ## Notes
 
 - Never commit your .env file to GitHub
