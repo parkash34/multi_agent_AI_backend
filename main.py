@@ -276,7 +276,7 @@ def get_session(session_id: str) -> list:
 
 def route_message(message: str, history: list) -> str:
     """Routes message to correct agent using history context."""
-    
+
     history_text = ""
     if history:
         recent = history[-4:]
@@ -318,3 +318,29 @@ def route_message(message: str, history: list) -> str:
         return "faq"
 
     return route
+
+@app.post("/chat")
+def chat(message: ChatMessage):
+    session_id = message.session_id
+    query = message.message
+
+    history = get_session(session_id)
+
+    route = route_message(query, history)
+    history.append(HumanMessage(content=query))
+
+    result = agents[route].invoke({"messages": history})
+    ai_message = result["messages"][-1]
+
+    history.append(ai_message)
+
+    return {
+        "answer": ai_message.content,
+        "routed_to": route,
+        "session_id": session_id,
+        "history_length": len(history)
+    }
+
+@app.get("/reservations")
+def getting_reservations(date: str= None):
+    return db_manager.get_all_reservations(date)
