@@ -348,3 +348,6 @@ def chat(message: ChatMessage):
         "history_length": len(history)
     }
 
+@app.post("/reservations")
+def get_reservations(date: str= None):
+    return db_manager.get_all_reservations(date)
