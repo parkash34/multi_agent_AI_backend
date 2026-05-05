@@ -104,3 +104,30 @@ if stats.total_vector_count == 0:
     print("Documents loaded successfully")
 else:
     print("Documents already loaded - skipping")
+
+llm = ChatGroq(
+        model="llama-3.3-70b-versatile",
+        temperature=0.2,
+        max_tokens=500,
+        api_key=api_key
+    )
+
+@tool
+def search_menu_rag(query: str) -> str:
+    """Searches the restaurant menu using semantic search.
+    Use this for any question about food, drinks or prices."""
+    results = vector_store.similarity_search(query, k=3)
+    context = ""
+    for doc in results:
+        context += f"{doc.page_content}\n\n"
+    return context if context else "No menu information found."
+
+@tool
+def search_faq_rag(query: str) -> str:
+    """Searches the restaurant FAQ using semantic search.
+    Use this for questions about hours, parking, policies etc."""
+    results = vector_store.similarity_search(query, k=3)
+    context = ""
+    for doc in results:
+        context += f"{doc.page_content}\n\n"
+    return context if context else "No FAQ information found."
