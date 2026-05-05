@@ -131,3 +131,87 @@ def search_faq_rag(query: str) -> str:
     for doc in results:
         context += f"{doc.page_content}\n\n"
     return context if context else "No FAQ information found."
+
+@tool
+def check_dietary_options(requirement: str) -> str:
+    """It checks whether specific deitary option is available or not.
+    Use this for any dietary related questions"""
+
+    dietary_options = ["vegetarian",
+    
+@tool
+def get_restaurant_info():
+    """Returns restaurants Information
+    Use this for restaurant information"""
+    return f"Name: {restaurant['name']}\nOpening Hours: {restaurant['opening_hours']}\nLocation: {restaurant['location']}\nPhone: {restaurant['phone']}" "vegan", "gluten_free"]
+
+    requirement = requirement.lower()
+
+    if requirement in dietary_options:
+        return f"Yes, we have available {requirement} option"
+    
+    return f"No, we don't have {requirement} option available."
+
+@tool
+def check_table_availability(date: str, time: str, people: str) -> dict:
+    """Checks if a table is available for a specific date, time and number of people.
+    Use this BEFORE booking to verify availability.
+    Date format must be YYYY-MM-DD like 2026-05-04.
+    Time can be any format like 7 PM, 19:00 or 7:00 PM.
+    People must be a number like 4."""
+    people = int(people)
+    return db_manager.check_availability(date, time, people)
+
+@tool
+def book_table(customer_name: str, date: str, time: str , people: str, special_requirement: str = None) -> dict:
+    """Books a table at the restaurant for a customer.
+    Use this AFTER checking availability.
+    Requires customer name, date in YYYY-MM-DD format, time and number of people.
+    Special requirement is optional — use for dietary needs or special occasions.
+    Always check availability first before calling this tool."""
+    people = int(people)
+    return db_manager.book_with_validation(customer_name, date, time, people, None, None, special_requirement)
+
+@tool
+def get_my_reservation(reference: str) -> dict:
+    """Retrieves reservation details by reference number.
+    Use this when customer asks about their existing booking.
+    Requires the reference number given at time of booking."""
+    reference = int(reference)
+    return db_manager.get_reservation_by_reference(reference)
+
+@tool
+def find_reservations_by_name(name: str) -> dict:
+    """Finds all reservations for a customer by their name.
+    Use this when customer provides their name and wants to see their bookings.
+    Returns all confirmed reservations sorted by date and time."""
+    return db_manager.get_reservations_by_name(name)
+
+@tool
+def cancel_my_reservation(reference: str) -> dict:
+    """Cancels an existing reservation by reference number.
+    Use this when customer wants to cancel their booking.
+    Requires the reference number.
+    Always confirm with customer before cancelling."""
+    reference = int(reference)
+    return db_manager.cancel_reservation(reference)
+
+@tool
+def update_my_reservation(reference: str, new_date: str = None, new_time: str= None, new_people: str= None ) -> dict:
+    """Updates an existing reservation by reference number.
+    Use this when customer wants to change their booking details.
+    Only provide the fields that need to be changed.
+    Reference number is required.
+    New date format must be YYYY-MM-DD.
+    New time can be any format like 7 PM or 19:00."""
+    reference = int(reference)
+    new_people = int(new_people) if new_people else None
+    return db_manager.update_reservation(reference, new_date, new_time, new_people)
+
+config = db_manager.get_config()
+
+@tool
+def get_restaurant_info():
+    """Returns restaurants Information
+    Use this for restaurant information"""
+    return f"Name: Bella Italia\nOpening Hours: {config['opening_time']} to {config['closing_time']}\nLocation: Astoria, New York\nPhone: 123-456-7890"
