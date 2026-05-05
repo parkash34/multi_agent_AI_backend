@@ -63,4 +63,28 @@ if "bella-italia-v2" not in pc.list_indexes().names():
             region="us-east-1"
         )
     )
+
+def build_pipeline():
+    all_chunks = []
+
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap=50
+    )
+
+    menu_loader = PyPDFLoader("menu.pdf")
+    menu_docs = menu_loader.load()
+    print(f"Menu pages loaded: {len(menu_docs)}")
+    menu_chunks = splitter.split_documents(menu_docs)
+    all_chunks.extend(menu_chunks)
+
+    faq_loader = TextLoader("faq.txt")
+    faq_docs = faq_loader.load()
+    print(f"FAQ documents loaded: {len(faq_docs)}")
+    faq_chunks = splitter.split_documents(faq_docs)
+
+    all_chunks.extend(faq_chunks)
+    print(f"Total chunks: {len(all_chunks)}")
+
+    return all_chunks
     
