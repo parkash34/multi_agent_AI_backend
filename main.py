@@ -88,3 +88,19 @@ def build_pipeline():
 
     return all_chunks
     
+
+vector_store = PineconeVectorStore(
+    index_name="bella-italia-v2",
+    embedding=embeddings,
+    pinecone_api_key=pinecone_api_key
+)
+
+index = pc.Index("bella-italia-v2")
+stats = index.describe_index_stats()
+
+if stats.total_vector_count == 0:
+    chunks = build_pipeline()
+    vector_store.add_documents(chunks)
+    print("Documents loaded successfully")
+else:
+    print("Documents already loaded - skipping")
