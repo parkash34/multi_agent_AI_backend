@@ -138,13 +138,7 @@ def check_dietary_options(requirement: str) -> str:
     """It checks whether specific deitary option is available or not.
     Use this for any dietary related questions"""
 
-    dietary_options = ["vegetarian",
-    
-@tool
-def get_restaurant_info():
-    """Returns restaurants Information
-    Use this for restaurant information"""
-    return f"Name: {restaurant['name']}\nOpening Hours: {restaurant['opening_hours']}\nLocation: {restaurant['location']}\nPhone: {restaurant['phone']}" "vegan", "gluten_free"]
+    dietary_options = ["vegetarian", "vegan", "gluten_free"]
 
     requirement = requirement.lower()
 
@@ -341,6 +335,3 @@ def chat(message: ChatMessage):
         "history_length": len(history)
     }
 
-@app.get("/reservations")
-def getting_reservations(date: str= None):
-    return db_manager.get_all_reservations(date)
