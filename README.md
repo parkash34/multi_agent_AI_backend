@@ -220,7 +220,7 @@ PINECONE_API_KEY=your_pinecone_api_key
 - Documents embedded once — skipped on subsequent restarts
 - Pinecone free tier — 1 index, 2GB, no credit card
 - Session memory resets when server restarts
-- routed_to field shows which agent handled each 
+- routed_to field shows which agent handled each message
 
 ## 👤 Author
 
